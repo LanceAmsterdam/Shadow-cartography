@@ -4,9 +4,121 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shadow Cartography</title>
+  <style>
+    :root{
+      --bg:#0e0e12; --ink:#f2f2f2; --muted:#b7b7c2;
+      --accent:#39ffd2; --accent2:#ff5c7a;
+      --grid1:conic-gradient(from 45deg,#0000 0 90deg,#20243a 0);
+      --grid2:linear-gradient(#0000 48%,#22273b 50%,#0000 52%);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto;
+      background:
+        var(--grid1) 0 0/22px 22px,
+        var(--grid2) 0 0/22px 22px,
+        radial-gradient(1000px 600px at 80% -10%, #2a2f4f 0, #151726 40%, var(--bg) 70%);
+      color:var(--ink);
+    }
+    header{padding:20px;text-align:center;border-bottom:1px solid #2a2d40}
+    header h1{margin:0;font-size:clamp(24px,6vw,40px);letter-spacing:.08em}
+    nav a{margin:0 10px;color:var(--muted);text-decoration:none;font-weight:600}
+    nav a:hover{color:var(--accent)}
+    .wrap{max-width:900px;margin:auto;padding:20px}
+    .hero{padding:30px;border:1px solid #2a2d40;border-radius:12px;
+      background:linear-gradient(180deg,#121527,var(--bg) 70%);
+      text-align:center;box-shadow:0 10px 30px #0008}
+    .hero h2{font-size:clamp(28px,7vw,48px);margin:.3em 0}
+    .btn{display:inline-block;margin:10px;padding:12px 18px;border-radius:8px;
+      background:var(--accent);color:#061a16;font-weight:700;text-decoration:none}
+    .btn.secondary{background:#1b1f33;color:var(--ink);border:1px solid #2a2d40}
+    footer{padding:40px 10px;text-align:center;font-size:12px;color:var(--muted)}
+    #map{height:300px;margin-top:20px;border:1px solid #2a2d40;border-radius:12px}
+    #mindmapCanvas{width:100%;height:300px;border:1px solid #2a2d40;
+      border-radius:12px;background:#0f1220;margin-top:20px}
+  </style>
 </head>
 <body>
-  <h1>Shadow Cartography</h1>
-  <p>Welcome! This is the first live version of your site.</p>
+
+<header>
+  <h1>SHADOW CARTOGRAPHY</h1>
+  <nav>
+    <a href="#home" onclick="showPage('home')">Home</a>
+    <a href="#topics" onclick="showPage('topics')">Topics</a>
+    <a href="#map" onclick="showPage('map')">Map</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <!-- Home -->
+  <section id="home" class="page">
+    <div class="hero">
+      <p class="kicker">Explore connections</p>
+      <h2>Mapping mysteries, overlaps, and evidence</h2>
+      <p>A Harper/Wyman-inspired single-page site. Switch pages with the nav or buttons below.</p>
+      <a class="btn" onclick="showPage('map')">Explore Map</a>
+      <a class="btn secondary" onclick="showPage('topics')">Browse Topics</a>
+    </div>
+    <canvas id="mindmapCanvas"></canvas>
+  </section>
+
+  <!-- Topics -->
+  <section id="topics" class="page" hidden>
+    <h2>Topics</h2>
+    <ul>
+      <li><strong>Phoenix Lights</strong> — 1997 UFO sightings across Arizona</li>
+      <li><strong>Nazca Lines</strong> — Ancient geoglyphs in Peru</li>
+      <li><strong>Project Glomar</strong> — Cold War secrecy & deep-sea ops</li>
+    </ul>
+    <p><a href="#" onclick="showPage('home')">← Back to Home</a></p>
+  </section>
+
+  <!-- Map -->
+  <section id="map" class="page" hidden>
+    <h2>World Map</h2>
+    <div id="map"></div>
+    <p><a href="#" onclick="showPage('home')">← Back to Home</a></p>
+  </section>
+</main>
+
+<footer>© 2025 Shadow Cartography</footer>
+
+<!-- Leaflet map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.hidden=true);
+  document.getElementById(id).hidden=false;
+  window.scrollTo(0,0);
+}
+
+// Init map
+const map = L.map('map').setView([20,0],2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+[
+  {name:'Phoenix Lights (1997)',coords:[33.4484,-112.0740]},
+  {name:'Nazca Lines',coords:[-14.739,-75.130]},
+  {name:'Project Glomar (Pacific)',coords:[31,-150]}
+].forEach(d=>{
+  L.marker(d.coords).addTo(map).bindPopup(d.name);
+});
+
+// Simple mind map demo
+const c=document.getElementById('mindmapCanvas'),ctx=c.getContext('2d');
+function resize(){c.width=c.clientWidth; c.height=c.clientHeight;}
+resize(); window.addEventListener('resize',resize);
+const nodes=[{x:100,y:100,t:'Phoenix Lights'},{x:200,y:150,t:'Nazca Lines'},{x:150,y:200,t:'Glomar'}];
+function draw(){
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle='#39ffd2';
+  nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f2f2f2';ctx.fillText(n.t,n.x+14,n.y+4);ctx.fillStyle='#39ffd2';});
+}
+setInterval(draw,1000/30);
+</script>
+
 </body>
 </html>
